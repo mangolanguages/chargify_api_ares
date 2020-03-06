@@ -191,6 +191,50 @@ module Chargify
       save
     end
 
+    # This class allows us to access the API endpoint dedicated to
+    # changing the default payment profile for a subscription.
+    class PaymentProfile < Base
+      include ResponseHelper
+      self.prefix = '/subscriptions/:subscription_id/'
+      self.collection_name = 'payment_profiles'
+
+      # Update the default payment profile for the subscription identified by
+      # `subscription_id` to the payment profile identified by `id`
+      def self.change_payment_profile(id, subscription_id:)
+        # Create a new instance of this class
+        profile = self.new
+        # Set the id of the new default payment profile
+        profile.id = id
+        # Setup the other route params
+        profile.prefix_options = { subscription_id: subscription_id }
+        # Call the endpoint
+        profile.change_payment_profile
+        # Return the result
+        profile
+      end
+
+      def change_payment_profile
+        # Required for a successful response
+        @persisted = true
+        # Perform the request. This corresponds to 
+        # /subscriptions/{subscription_id}/payment_profiles/{id}/change_payment_profile.json
+        post :change_payment_profile
+      end
+
+      def self.delete(id, subscription_id:)
+        profile = self.new
+        profile.id = id
+        profile.prefix_options = { subscription_id: subscription_id }
+        profile.delete_self
+        profile
+      end
+
+      def delete_self
+        @persisted = true
+        destroy
+      end
+    end
+
     private
 
     class Component < Base
