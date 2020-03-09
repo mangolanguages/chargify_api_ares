@@ -193,6 +193,9 @@ module Chargify
 
     # This class allows us to access the API endpoint dedicated to
     # changing the default payment profile for a subscription.
+    #
+    # This implementation is based on a suggestion from this issue
+    # https://github.com/chargify/chargify_api_ares/issues/158
     class PaymentProfile < Base
       include ResponseHelper
       self.prefix = '/subscriptions/:subscription_id/'
@@ -201,36 +204,32 @@ module Chargify
       # Update the default payment profile for the subscription identified by
       # `subscription_id` to the payment profile identified by `id`
       def self.change_payment_profile(id, subscription_id:)
-        # Create a new instance of this class
-        profile = self.new
-        # Set the id of the new default payment profile
-        profile.id = id
-        # Setup the other route params
-        profile.prefix_options = { subscription_id: subscription_id }
-        # Call the endpoint
+        profile = self.new(id: id, prefix_options: { subscription_id: subscription_id })
         profile.change_payment_profile
-        # Return the result
         profile
       end
 
-      def change_payment_profile
-        # Required for a successful response
-        @persisted = true
-        # Perform the request. This corresponds to 
-        # /subscriptions/{subscription_id}/payment_profiles/{id}/change_payment_profile.json
-        post :change_payment_profile
-      end
-
+      # Delete this payment method from the given subscription AND ALL OTHER SUBSCRIPTIONS.
+      # This is used to _actually_ remove a payment profile completely.
       def self.delete(id, subscription_id:)
-        profile = self.new
-        profile.id = id
-        profile.prefix_options = { subscription_id: subscription_id }
+        profile = self.new(id: id, prefix_options: { subscription_id: subscription_id })
         profile.delete_self
         profile
       end
 
+      private
+
+      def change_payment_profile
+        @persisted = true
+        # Perform the request. This corresponds to 
+        # POST /subscriptions/{subscription_id}/payment_profiles/{id}/change_payment_profile.json
+        post :change_payment_profile
+      end
+
       def delete_self
         @persisted = true
+        # Perform the request. This corresponds to 
+        # DELETE /subscriptions/{subscription_id}/payment_profiles/{id}.json
         destroy
       end
     end
