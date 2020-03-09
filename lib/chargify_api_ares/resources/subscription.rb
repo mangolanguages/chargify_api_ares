@@ -221,8 +221,6 @@ module Chargify
         profile
       end
 
-      private
-
       def change_payment_profile
         @persisted = true
         # Perform the request. This corresponds to 
