@@ -191,6 +191,10 @@ module Chargify
       save
     end
 
+    def change_payment_profile(new_profile_id)
+      Subscription::PaymentProfile.change_payment_profile(new_profile_id, subscription_id: id)
+    end
+
     # This class allows us to access the API endpoint dedicated to
     # changing the default payment profile for a subscription.
     #
