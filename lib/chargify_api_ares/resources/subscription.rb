@@ -208,7 +208,9 @@ module Chargify
       # Update the default payment profile for the subscription identified by
       # `subscription_id` to the payment profile identified by `id`
       def self.change_payment_profile(id, subscription_id:)
-        profile = new(id: id, prefix_options: { subscription_id: subscription_id })
+        profile = new
+        profile.id = id
+        profile.prefix_options = { subscription_id: subscription_id }
         profile.change_payment_profile
         profile
       end
@@ -216,7 +218,9 @@ module Chargify
       # Delete this payment method from the given subscription AND ALL OTHER SUBSCRIPTIONS.
       # This is used to _actually_ remove a payment profile completely.
       def self.delete(id, subscription_id:)
-        profile = new(id: id, prefix_options: { subscription_id: subscription_id })
+        profile = new
+        profile.id = id
+        profile.prefix_options = { subscription_id: subscription_id }
         profile.delete_self
         profile
       end
