@@ -96,10 +96,18 @@ module Chargify
       end
     end
 
-    def refund(attrs = {})
+    # Process a refund.  If external is true, no refund will
+    # be processed.  Instead, the system will create a record
+    # of the external refund.
+    #
+    def refund(attrs = {}, external = false)
       attrs, options = extract_uniqueness_token(attrs)
       process_capturing_errors do
-        post :refunds, options, attrs.to_xml(:root => :refund)
+        payload = {
+          refund: attrs,
+          external: external
+        }
+        post :refunds, options, payload.to_xml
       end
     end
 
