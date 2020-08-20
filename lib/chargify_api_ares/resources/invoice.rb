@@ -1,5 +1,15 @@
 module Chargify
+
+  class InvoiceCollection < ActiveResource::Collection
+    def initialize(parsed = {})
+      @elements = parsed['invoices']
+    end
+  end
+
   class Invoice < Base
+    include ResponseHelper
+
+    self.collection_parser = Chargify::InvoiceCollection
 
     class Payment < Base
       include ResponseHelper
