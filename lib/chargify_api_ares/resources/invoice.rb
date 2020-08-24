@@ -52,5 +52,26 @@ module Chargify
     def payment(attrs = {})
       Payment.create(attrs.merge({:invoice_id => self.id}))
     end
+
+    # Process a refund.  If external is true, no refund will
+    # be processed.  Instead, the system will create a record
+    # of the external refund.
+    #
+    # Required Params:
+    #  - amount: A string of the dollar amount to be refunded (eg. "10.50" => $10.50)
+    #  - memo: A description that will be attached to the refund
+    #  - payment_id: The ID of the payment to be refunded
+    #
+    # Optional Params:
+    #  - external: Flag that marks refund as external (no money is returned to the customer). Defaults to false.
+    #  - apply_credit: If set to true, creates credit and applies it to an invoice. Defaults to false.
+    #  - void_invoice: If apply_credit set to false and refunding full amount, if void_invoice set to true, invoice will be voided after refund. Defaults to false.
+    #
+    def refund(attrs = {})
+      attrs, options = extract_uniqueness_token(attrs)
+      process_capturing_errors do
+        post :refunds, options, attrs.to_xml(root: :refund)
+      end
+    end
   end
 end
