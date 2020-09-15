@@ -73,8 +73,14 @@ module Chargify
     #  - apply_credit: If set to true, creates credit and applies it to an invoice. Defaults to false.
     #  - void_invoice: If apply_credit set to false and refunding full amount, if void_invoice set to true, invoice will be voided after refund. Defaults to false.
     #
-    def refund(attrs = {})
-      Refund.create(attrs.merge(invoice_id: self.uid))
+    def refund(amount:, memo:, payment_id:, **attrs)
+      Refund.create(
+        amount: amount,
+        memo: memo,
+        payment_id: payment_id,
+        invoice_id: uid,
+        **attrs
+      )
     end
   end
 end
