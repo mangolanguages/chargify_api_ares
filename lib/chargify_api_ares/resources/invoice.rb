@@ -17,6 +17,12 @@ module Chargify
       self.prefix = '/invoices/:invoice_id/'
     end
 
+    class Refund < Base
+      include ResponseHelper
+
+      self.prefix = '/invoices/:invoice_id/'
+    end
+
     def self.find_by_invoice_id(id)
       find(:first, {:params => {:id => id}})
     end
@@ -68,10 +74,7 @@ module Chargify
     #  - void_invoice: If apply_credit set to false and refunding full amount, if void_invoice set to true, invoice will be voided after refund. Defaults to false.
     #
     def refund(attrs = {})
-      attrs, options = extract_uniqueness_token(attrs)
-      process_capturing_errors do
-        post :refunds, options, attrs.to_xml(root: :refund)
-      end
+      Refund.create(attrs.merge(invoice_id: self.uid))
     end
   end
 end
